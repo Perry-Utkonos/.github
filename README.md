@@ -80,7 +80,8 @@ flowchart TD
 
 Схема показывает основные сущности и связи. Это проект БД; миграции ещё не реализованы. Типы идентификаторов и обязательность полей нужно закрепить при разработке.
 
-```mermaiderDiagram
+```mermaid
+erDiagram
     users ||--o| user_profile : has
     users ||--o{ swipes : acts
     users ||--o{ swipes : receives
