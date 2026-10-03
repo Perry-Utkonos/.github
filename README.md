@@ -80,85 +80,82 @@ flowchart TD
 
 Схема показывает основные сущности и связи. Это проект БД; миграции ещё не реализованы. Типы идентификаторов и обязательность полей нужно закрепить при разработке.
 
-```mermaid
-erDiagram
-    USER ||--|| PROFILE : owns
-    PROFILE ||--o{ PHOTO : contains
-    PROFILE ||--o{ PROFILE_INTEREST : has
-    INTEREST ||--o{ PROFILE_INTEREST : included
-    USER ||--o{ LIKE : sends
-    USER ||--o{ LIKE : receives
-    USER ||--o{ MATCH : participates_as_first
-    USER ||--o{ MATCH : participates_as_second
-    MATCH ||--o{ MESSAGE : contains
-    USER ||--o{ MESSAGE : sends
-    MATCH ||--o{ TAROT_READING : has
-    USER ||--o{ TAROT_READING : requests
-    TAROT_READING ||--|{ READING_CARD : contains
-    TAROT_CARD ||--o{ READING_CARD : appears_in
+```mermaiderDiagram
+    users ||--o| user_profile : has
+    users ||--o{ swipes : acts
+    users ||--o{ swipes : receives
+    users ||--o{ conversations : user_a
+    users ||--o{ conversations : user_b
+    conversations ||--o{ messages : contains
+    users ||--o{ messages : sends
+    conversations ||--o{ message_reads : tracks
+    users ||--o{ message_reads : reads
+    messages ||--o{ attachments : has
+    messages |o--o{ messages : replies_to
+    messages |o--o{ conversations : last_message
 
-    USER {
+    users {
         uuid id PK
-        string email UK
-        string password_hash
-        datetime created_at
+        text username UK
+        text email UK
+        text phone_number UK
     }
-    PROFILE {
-        uuid user_id PK,FK
-        string name
+
+    user_profile {
+        uuid profile_id PK
+        uuid user_id FK
+        text bio
+        text properties
+        varchar sex
         date birth_date
-        string gender
-        string city
-        string description
-        string looking_for
+        timestamp last_seen_at
+        timestamp created_at
     }
-    PHOTO {
+
+    swipes {
+        uuid actor_id PK,FK
+        uuid target_id PK,FK
+        smallint action
+        timestamp created_at
+    }
+
+    conversations {
         uuid id PK
-        uuid profile_id FK
-        string url
-        int sort_order
+        uuid user_a_id FK
+        uuid user_b_id FK
+        uuid last_message_id FK
+        timestamp last_message_at
+        text last_message_body
+        timestamp created_at
+        timestamp updated_at
     }
-    INTEREST {
+
+    messages {
         uuid id PK
-        string name UK
-    }
-    PROFILE_INTEREST {
-        uuid profile_id PK,FK
-        uuid interest_id PK,FK
-    }
-    LIKE {
-        uuid sender_id PK,FK
-        uuid recipient_id PK,FK
-        datetime created_at
-    }
-    MATCH {
-        uuid id PK
-        uuid first_user_id FK
-        uuid second_user_id FK
-        datetime created_at
-    }
-    MESSAGE {
-        uuid id PK
-        uuid match_id FK
+        uuid conversation_id FK
         uuid sender_id FK
-        string text
-        datetime created_at
+        bigint seq
+        text body
+        text type
+        uuid reply_to_id FK
+        timestamp created_at
+        timestamp edited_at
     }
-    TAROT_READING {
+
+    message_reads {
+        uuid conversation_id PK,FK
+        uuid user_id PK,FK
+        bigint last_read_seq
+        timestamp last_read_at
+    }
+
+    attachments {
         uuid id PK
-        uuid match_id FK
-        uuid requested_by FK
-        datetime created_at
-    }
-    TAROT_CARD {
-        uuid id PK
-        string name
-        string interpretation
-    }
-    READING_CARD {
-        uuid reading_id PK,FK
-        int position PK
-        uuid card_id FK
+        uuid message_id FK
+        text file_name
+        text mime_type
+        text base64_url
+        timestamp created_at
     }
 ```
 
